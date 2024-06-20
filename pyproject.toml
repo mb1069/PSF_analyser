@@ -33,7 +33,7 @@ dependencies = {file = ["requirements.txt"]}
 Homepage = "https://github.com/mb1069/psf_analyser"
 
 [project.scripts]
-psf-prep-data = "psf_analyser.prepare_data:main_cli"
+psf-prep-data = "psf_analyser.prepare_data.main:run_tool"
 
 [project.gui-scripts]
 psf-gui = "psf_analyser.app:main"

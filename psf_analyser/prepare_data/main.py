@@ -9,8 +9,7 @@ pd.options.mode.chained_assignment = None
 
 import numpy as np
 from sklearn.metrics import euclidean_distances
-from tifffile import imread, imwrite, TiffFile
-from skimage.feature import match_template
+from tifffile import imwrite, TiffFile
 from skimage.filters import butterworth
 from skimage.filters import gaussian
 import matplotlib.pyplot as plt
@@ -23,11 +22,11 @@ from scipy.interpolate import UnivariateSpline
 from scipy.ndimage import gaussian_filter
 import json
 import shutil
-
-from data_handler.util import grid_psfs
 import seaborn as sns
 import tensorflow as tf
-from psf_metrics import get_lat_fwhm, get_axial_fwhm, get_projections
+
+from psf_analyser.data_handler.util import grid_psfs
+from psf_analyser.prepare_data.psf_metrics import get_lat_fwhm, get_axial_fwhm, get_projections
 
 
 def norm_zero_one(s):
@@ -566,7 +565,7 @@ def write_stack_projections(stacks, zstep, outpath):
         shutil.rmtree(outdir)
     os.makedirs(outdir, exist_ok=True)
 
-    for i, stack in tqdm(enumerate(stacks)):
+    for i, stack in tqdm(enumerate(stacks), total=stacks.shape[0]):
         img_path = os.path.join(outdir, f'{i}.jpg')
         fig = get_projections(stack, zstep)
         plt.savefig(img_path)
@@ -574,13 +573,12 @@ def write_stack_projections(stacks, zstep, outpath):
 
 
 
-def main():
+def run_tool():
     args = parse_args()
     print(args)
     test_picasso_exec()
     args = transform_args(args)
     validate_args(args)
-    main(args)
 
     all_stacks = []
     all_spots = []
@@ -724,4 +722,4 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    main()
+    run_tool()

@@ -1,7 +1,7 @@
 from scipy.interpolate import Rbf
 import numpy as np
 import plotly.graph_objects as go
-from config import PLOTLY_THEME
+from psf_analyser.config import PLOTLY_THEME
 
 def fit_smooth_surface(points_x, points_y, points_z, smooth=0.1):
     """

@@ -5,11 +5,11 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 from natsort import natsorted
 
-from data_handler.util import find_files_in_result_dir
-from data_handler.bead_data_handler import BeadDataHandler
-from plotting_funcs.rbf_surface import gen_surface_plot
-from pages.components.ind_bead_view import get_ind_bead_view, get_bead_xy_scatter, gen_bead_table
-from pages.components.explore_bead_view import get_explore_bead_view
+from psf_analyser.data_handler.util import find_files_in_result_dir
+from psf_analyser.data_handler.bead_data_handler import BeadDataHandler
+from psf_analyser.plotting_funcs.rbf_surface import gen_surface_plot
+from psf_analyser.pages.components.ind_bead_view import get_ind_bead_view, get_bead_xy_scatter, gen_bead_table
+from psf_analyser.pages.components.explore_bead_view import get_explore_bead_view
 
 dash.register_page(__name__)
 
