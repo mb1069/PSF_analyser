@@ -105,22 +105,41 @@ def gen_figs(locs):
     ]
     return figs
 
+def no_files_found_layout():
+    return dbc.Container([
+        html.H4('No folder name specified...'),
+        html.A(href='/', children=[
+            html.P('Click here to return to the home page')
+        ])
+    ])
 
 def layout(folder_name=None):
     global data_handler
-    files = find_files_in_result_dir(folder_name)
-    data_handler = BeadDataHandler(**files)
-    fnames = ['all'] + list(natsorted(data_handler.locs['fname'].unique()))
-    return dbc.Container([
-        html.H1('Loading results...'),
-        dbc.Row([
-            dbc.Col([
-                dbc.Label('Select bead stacks:', html_for='file-selector'),
-                dcc.Dropdown(options=fnames, value='all', id='file-selector'),
+    if folder_name is None:
+        return no_files_found_layout()
+
+    try:
+        files = find_files_in_result_dir(folder_name)
+        data_handler = BeadDataHandler(**files)
+        fnames = ['all'] + list(natsorted(data_handler.locs['fname'].unique()))
+        return dbc.Container([
+            html.H1('Loading results...'),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Label('Select bead stacks:', html_for='file-selector'),
+                    dcc.Dropdown(options=fnames, value='all', id='file-selector'),
+                ])
+            ], style={'margin-bottom': '1em'}),
+            dbc.Row(dbc.Col(*gen_figs(data_handler.locs)))
+        ], className='dbc')
+    except Exception as e:
+        
+        return dbc.Container([
+            dbc.Alert(f'Could not find results in path {folder_name}', color='danger'),
+            html.A(href='/', children=[
+                html.P('Click here to return to the home page')
             ])
-        ], style={'margin-bottom': '1em'}),
-        dbc.Row(dbc.Col(*gen_figs(data_handler.locs)))
-    ], className='dbc')
+        ])
 
 
 @callback(
