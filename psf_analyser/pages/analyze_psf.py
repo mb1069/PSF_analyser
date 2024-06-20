@@ -5,8 +5,8 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 from natsort import natsorted
 
-from psf_analyzer.util import find_files_in_result_dir
-from psf_analyzer.bead_data_handler import BeadDataHandler
+from data_handler.util import find_files_in_result_dir
+from data_handler.bead_data_handler import BeadDataHandler
 from plotting_funcs.rbf_surface import gen_surface_plot
 from pages.components.ind_bead_view import get_ind_bead_view, get_bead_xy_scatter, gen_bead_table
 from pages.components.explore_bead_view import get_explore_bead_view
@@ -15,35 +15,56 @@ dash.register_page(__name__)
 
 data_handler = None
 
-def fig_fwhm_xy(locs):
+def fig_fwhm_xy(data_handler):
+    max_mse = 0.001
     labels = {
         'x': 'X (pixels)',
         'y': 'Y (pixels)',
         'fwhm_xy': 'Lateral FWHM (nm)'
     }
     title = 'Lateral FWHM (nm) across FOV'
-    fig = gen_surface_plot(locs[locs['fwhm_xy_mse']<0.001], 'x', 'y', 'fwhm_xy', labels, title)
+
+    vis_locs = data_handler.locs
+    all_locs = data_handler._locs
+    all_locs = all_locs[all_locs['fwhm_xy_mse']<=max_mse]
+    z_min = all_locs['fwhm_xy'].min()
+    z_max = all_locs['fwhm_xy'].max()
+
+    fig = gen_surface_plot(vis_locs[vis_locs['fwhm_xy_mse']<0.001], 'x', 'y', 'fwhm_xy', labels, title, z_min, z_max)
     return fig
 
 
-def fig_fwhm_z(locs):
+def fig_fwhm_z(data_handler):
+    max_mse = 0.2
     labels = {
         'x': 'X (pixels)',
         'y': 'Y (pixels)',
         'fwhm_z': 'Axial FWHM (nm)'
     }
     title = 'Axial FWHM (nm) across FOV'
-    fig = gen_surface_plot(locs[locs['fwhm_z_mse']<0.2], 'x', 'y', 'fwhm_z', labels, title)
+
+    vis_locs = data_handler.locs
+    all_locs = data_handler._locs
+    all_locs = all_locs[all_locs['fwhm_z_mse']<=max_mse]
+    z_min = all_locs['fwhm_z'].min()
+    z_max = all_locs['fwhm_z'].max()
+
+    fig = gen_surface_plot(vis_locs[vis_locs['fwhm_z_mse']<0.2], 'x', 'y', 'fwhm_z', labels, title, z_min, z_max)
     return fig
 
-def fig_offset_surface(locs):
+def fig_offset_surface(data_handler):
     labels = {
         'x': 'X (pixels)',
         'y': 'Y (pixels)',
         'offset': 'Offset (nm)'
     }
     title = 'Offset (nm)'
-    fig = gen_surface_plot(locs, 'x', 'y', 'offset', labels, title)
+
+    vis_locs = data_handler.locs
+    all_locs = data_handler._locs
+    z_min = all_locs['offset'].min()
+    z_max = all_locs['offset'].max()
+    fig = gen_surface_plot(vis_locs, 'x', 'y', 'offset', labels, title, z_min, z_max)
     return fig
 
 
@@ -56,7 +77,7 @@ def fig_offset_scatter(locs):
     title = 'Offset (nm)'
     fig = px.scatter(locs, x='x', y='y', labels=labels, title=title)
     fig.update_yaxes(
-        scaleanchor = "x",
+        scaleanchor = 'x',
         scaleratio = 1,
     )
     return fig
@@ -66,13 +87,13 @@ def gen_figs(locs):
         dbc.Accordion([
             dbc.AccordionItem([
                 dbc.Row([
-                    dbc.Col(dcc.Graph(id='fwhm_xy', figure=fig_fwhm_xy(locs))),
-                    dbc.Col(dcc.Graph(id='fwhm_z', figure=fig_fwhm_z(locs)))
+                    dbc.Col(dcc.Graph(id='fwhm_xy', figure=fig_fwhm_xy(data_handler))),
+                    dbc.Col(dcc.Graph(id='fwhm_z', figure=fig_fwhm_z(data_handler)))
                 ]),
                 
             ], title='FWHM (xy and z)'),
             dbc.AccordionItem([
-                dbc.Col(dcc.Graph(id='offsets_surface', figure=fig_offset_surface(locs))),
+                dbc.Col(dcc.Graph(id='offsets_surface', figure=fig_offset_surface(data_handler))),
             ], title='Offset'),
             dbc.AccordionItem([
                 get_explore_bead_view(data_handler)
@@ -94,12 +115,12 @@ def layout(folder_name=None):
         html.H1('Loading results...'),
         dbc.Row([
             dbc.Col([
-                dbc.Label("Select files", html_for="file-selector"),
+                dbc.Label('Select bead stacks:', html_for='file-selector'),
                 dcc.Dropdown(options=fnames, value='all', id='file-selector'),
             ])
         ], style={'margin-bottom': '1em'}),
         dbc.Row(dbc.Col(*gen_figs(data_handler.locs)))
-    ], className="dbc")
+    ], className='dbc')
 
 
 @callback(
@@ -136,15 +157,14 @@ def filter_data_handler_by_files(value):
     if value != 'all':
         locs = locs[locs['fname']==value]
     data_handler.locs = locs
-    print(list(locs))
 
     i = locs['point_id'].to_numpy()[0]
     img = data_handler.get_bead_profile_img(i)
     fig = get_bead_xy_scatter(data_handler, i)
     table = gen_bead_table(data_handler, i)
 
-    fwhm_xy_fig = fig_fwhm_xy(locs)
-    fwhm_z_fig = fig_fwhm_z(locs)
-    offsets_surface_fig = fig_offset_surface(locs)
+    fwhm_xy_fig = fig_fwhm_xy(data_handler)
+    fwhm_z_fig = fig_fwhm_z(data_handler)
+    offsets_surface_fig = fig_offset_surface(data_handler)
 
     return fwhm_xy_fig, fwhm_z_fig, offsets_surface_fig, img, fig, table

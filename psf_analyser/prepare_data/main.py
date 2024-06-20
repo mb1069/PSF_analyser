@@ -24,7 +24,7 @@ from scipy.ndimage import gaussian_filter
 import json
 import shutil
 
-from psf_analyzer.util import grid_psfs
+from data_handler.util import grid_psfs
 import seaborn as sns
 import tensorflow as tf
 from psf_metrics import get_lat_fwhm, get_axial_fwhm, get_projections
@@ -574,7 +574,14 @@ def write_stack_projections(stacks, zstep, outpath):
 
 
 
-def main(args):
+def main():
+    args = parse_args()
+    print(args)
+    test_picasso_exec()
+    args = transform_args(args)
+    validate_args(args)
+    main(args)
+
     all_stacks = []
     all_spots = []
     all_locs = []
@@ -717,9 +724,4 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    args = parse_args()
-    print(args)
-    test_picasso_exec()
-    args = transform_args(args)
-    validate_args(args)
-    main(args)
+    main()

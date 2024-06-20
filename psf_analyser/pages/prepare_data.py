@@ -5,7 +5,7 @@ from pathlib import Path
 from natsort import natsorted
 dash.register_page(__name__)
 
-from psf_analyzer.util import find_files_in_result_dir
+from data_handler.util import find_files_in_result_dir
 
 layout = dbc.Container([
         html.Br(),

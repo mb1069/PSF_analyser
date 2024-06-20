@@ -25,7 +25,7 @@ def fit_smooth_surface(points_x, points_y, points_z, smooth=0.1):
     
     return interp_func
 
-def gen_surface_plot(df, x_col, y_col, z_col, labels, title):
+def gen_surface_plot(df, x_col, y_col, z_col, labels, title, z_min, z_max):
     points_x = df[x_col].to_numpy()
     points_y = df[y_col].to_numpy()
     points_z = df[z_col].to_numpy()
@@ -50,7 +50,9 @@ def gen_surface_plot(df, x_col, y_col, z_col, labels, title):
             x=new_x, 
             y=new_y,
             colorbar={"title": labels[z_col]},
-            name=""
+            name="",
+            zmin=z_min,
+            zmax=z_max,
         ),
         layout=layout
     )
