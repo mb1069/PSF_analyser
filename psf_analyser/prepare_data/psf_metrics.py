@@ -147,19 +147,39 @@ def get_projections(stack, zstep, zrange=2000):
     
     # xy view
     img = s.sum(axis=(0))
-    axs[0].imshow(img)
+    mean_p0, mean_p1 = np.mean(img, axis = 0), np.mean(img, axis = 1)
+    x_profile = mean_p0 / np.max(mean_p0) * 0.3*img.shape[1]
+    y_profile = mean_p1 / np.max(mean_p1) * 0.3*img.shape[0]
+
+    axs[0].imshow(img, cmap = 'gray')
+    axs[0].plot(np.arange(img.shape[0]), x_profile, label = 'x profile')
+    axs[0].plot(y_profile, np.arange(img.shape[1]), label = 'y profile')
     axs[0].set_xlabel('X')
     axs[0].set_ylabel('Y')
     
     # zy
     img = s.sum(axis=1)
-    axs[1].imshow(resize_side_profile(img))
+    img_resized = resize_side_profile(img)
+    mean_p0, mean_p1 = np.mean(img_resized, axis = 0), np.mean(img_resized, axis = 1)
+    x_profile = mean_p0 / np.max(mean_p0) * 0.3*img_resized.shape[1]
+    y_profile = mean_p1 / np.max(mean_p1) * 0.3*img_resized.shape[0]
+    
+    axs[1].imshow(img_resized, cmap = 'gray')
+    axs[1].plot(np.arange(img_resized.shape[0]), x_profile, label = 'x profile')
+    axs[1].plot(y_profile, np.arange(img_resized.shape[1]), label = 'y profile')
     axs[1].set_xlabel('Y')
     axs[1].set_ylabel('Z')
 
     # zx
     img = s.sum(axis=2)
-    axs[2].imshow(resize_side_profile(img))
+    img_resized = resize_side_profile(img)
+    mean_p0, mean_p1 = np.mean(img_resized, axis = 0), np.mean(img_resized, axis = 1)
+    x_profile = mean_p0 / np.max(mean_p0) * 0.3*img_resized.shape[1]
+    y_profile = mean_p1 / np.max(mean_p1) * 0.3*img_resized.shape[0]
+    
+    axs[2].imshow(img_resized, cmap = 'gray')
+    axs[2].plot(np.arange(img_resized.shape[0]), x_profile, label = 'x profile')
+    axs[2].plot(y_profile, np.arange(img_resized.shape[1]), label = 'y profile')
     axs[2].set_xlabel('X')
     axs[2].set_ylabel('Z')
 
