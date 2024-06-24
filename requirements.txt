@@ -7,6 +7,7 @@ natsort==8.4.0
 numpy==1.24.3
 pandas==2.1.1
 picassosr @ file:///home/miguel/Projects/smlm_z/picasso
+pyotf==0.0.3
 PyYAML==6.0.1
 scikit-image==0.23.2
 scikit-learn==1.3.1
