@@ -575,8 +575,8 @@ def write_stack_projections(stacks, zstep, outpath):
 def get_zernike_model(psfs, locs, z_step, px_size, args):
     print('Zernike modelling...')
     N_ZERN = 16
-    labels_pcoef = [f'pcoef_{i}' for i in range(N_ZERN)]
-    labels_mcoef = [f'mcoef_{i}' for i in range(N_ZERN)]
+    labels_pcoef = [f'pcoef_{i+1}' for i in range(N_ZERN)]
+    labels_mcoef = [f'mcoef_{i+1}' for i in range(N_ZERN)]
     for l in labels_mcoef + labels_pcoef:
         locs[l] = np.nan
 
