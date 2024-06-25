@@ -14,17 +14,3 @@ def find_files_in_result_dir(dirname):
     }
 
     return tiff_files
-
-
-def grid_psfs(psfs, cols=10):
-    rows = (len(psfs) // cols) + (1 if len(psfs) % cols != 0 else 0)
-    n_spaces = int(cols * rows)
-    if n_spaces > len(psfs):
-        placeholder = np.zeros((n_spaces-len(psfs), *psfs[0].shape))
-        placeholder[:] = np.mean(psfs)
-        psfs = np.concatenate((psfs, placeholder))
-        cols = len(psfs) // rows
-    psfs = list(chunks(psfs, cols))
-    psfs = [np.concatenate(p, axis=-1) for p in psfs]
-    psfs = np.concatenate(psfs, axis=-2)
-    return psfs

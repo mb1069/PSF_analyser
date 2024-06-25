@@ -26,8 +26,8 @@ import seaborn as sns
 import tensorflow as tf
 
 from psf_analyser.data_handler.util import grid_psfs
-from psf_analyser.prepare_data.psf_metrics import get_lat_fwhm, get_axial_fwhm, get_projections
-
+from psf_metrics import get_lat_fwhm, get_axial_fwhm, get_projections
+from zernike_model import model_psf_zerns
 
 def norm_zero_one(s):
     max_s = s.max()
@@ -572,6 +572,32 @@ def write_stack_projections(stacks, zstep, outpath):
         plt.close()
 
 
+def get_zernike_model(psfs, locs, z_step, px_size, args):
+    print('Zernike modelling...')
+    N_ZERN = 16
+    labels_pcoef = [f'pcoef_{i+1}' for i in range(N_ZERN)]
+    labels_mcoef = [f'mcoef_{i+1}' for i in range(N_ZERN)]
+    for l in labels_mcoef + labels_pcoef:
+        locs[l] = np.nan
+
+    cols = pd.Series(range(locs.shape[1]), index=locs.columns)
+    mcoef_idx = cols.reindex(labels_mcoef)
+    pcoef_idx = cols.reindex(labels_pcoef)
+
+    model_kwargs = {
+        'wl': args['wavelength'],
+        'na': args['numerical_aperture'],
+        'ni': args['ni'],
+        'res': px_size,
+        'zres': z_step
+    }
+
+    for i, psf in enumerate(tqdm(psfs)):
+        mcoefs, pcoefs = model_psf_zerns(psf.squeeze(), model_kwargs)
+        locs.iloc[i, mcoef_idx] = mcoefs
+        locs.iloc[i, pcoef_idx] = pcoefs
+    return locs
+
 
 def run_tool():
     args = parse_args()
@@ -679,6 +705,9 @@ def run_tool():
 
     stacks, locs = realign_beads(stacks, locs, z_step)
 
+    if args['zern']:
+        locs = get_zernike_model(np.array(stacks), locs, z_step, px_size, args)
+
     stacks, locs = get_bead_metrics(stacks, locs, px_size, z_step)
 
     write_stack_projections(stacks, z_step, args['outpath'])
@@ -717,7 +746,20 @@ def parse_args():
     parser.add_argument('-gb', '--gaussian-blur', default='3,2,2', help='Gaussian pixel-blur in Z/Y/X for bead offset estimation')
     parser.add_argument('--debug', action='store_true')
 
+    parser.add_argument('--zern', action='store_true')
+    parser.add_argument('-w', '--wavelength', help='Emission wavelength of the system (nm)', type=int)
+    parser.add_argument('-na', '--numerical-aperture', help='Numerical aperature of the system', type=float)
+    parser.add_argument('-ni', '--ni', help='Refractive index of the media', type=float)
+
     args = vars(parser.parse_args())
+    if args['zern']:
+        req_params = ['numerical_aperture', 'wavelength', 'ni']
+        missing_req = []
+        for r in req_params:
+            if args[r] is None:
+                missing_req.append(r)
+        if len(missing_req) > 0:
+            raise AttributeError(f'Arguments missing to compute zern polynomial of data: {missing_req}')
     return args
 
 
