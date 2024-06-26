@@ -96,9 +96,9 @@ def gen_figs():
             dbc.AccordionItem([
                 dbc.Col(dcc.Graph(id='offsets_surface', figure=fig_offset_surface(data_handler))),
             ], title='Offset'),
-            dbc.AccordionItem([
-                get_explore_bead_view(data_handler)
-            ], title='Explore beads'),
+            # dbc.AccordionItem([
+            #     get_explore_bead_view(data_handler)
+            # ], title='Explore beads'),
             dbc.AccordionItem([
                 get_ind_bead_view(data_handler, 0)
             ], title='Invididual beads'),
