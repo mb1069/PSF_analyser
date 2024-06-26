@@ -1,5 +1,15 @@
 
 # PSF_analyzer
+
+## Dependencies
+A custom version of Picasso is currently used; it can be downloaded and installed from the following url or using the following command:
+
+https://github.com/mb1069/picasso.git
+
+```sh
+pip install git+https://github.com/mb1069/picasso.git#egg=picassosr
+```
+
 ## Installation
 
 The package can be installed as a Python package (currently tested for Python 3.10).

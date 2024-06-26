@@ -1,5 +1,3 @@
-from psf_analyser.plotting_funcs.rbf_surface import gen_surface_plot
-
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 import plotly.express as px
