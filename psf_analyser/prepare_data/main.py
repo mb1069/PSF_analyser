@@ -68,7 +68,6 @@ def get_or_create_slice(bead_stack, slice_path):
         im_slice = bead_stack[bead_stack.shape[0]//2]
         # plt.imshow(im_slice)
         # plt.show()
-        print(im_slice.shape)
         imwrite(slice_path, im_slice.astype(np.uint16))
     return slice_path
 
@@ -574,16 +573,18 @@ def write_stack_projections(stacks, zstep, outpath):
 
 def get_zernike_model(psfs, locs, z_step, px_size, args):
     print('Zernike modelling...')
+
+    zern_mse_col = 'zern_fit_mse'
     N_ZERN = 16
     labels_pcoef = [f'pcoef_{i+1}' for i in range(N_ZERN)]
     labels_mcoef = [f'mcoef_{i+1}' for i in range(N_ZERN)]
-    for l in labels_mcoef + labels_pcoef:
+    for l in labels_mcoef + labels_pcoef + [zern_mse_col]:
         locs[l] = np.nan
 
     cols = pd.Series(range(locs.shape[1]), index=locs.columns)
     mcoef_idx = cols.reindex(labels_mcoef)
     pcoef_idx = cols.reindex(labels_pcoef)
-
+    mse_idx = cols.reindex([zern_mse_col])
     model_kwargs = {
         'wl': args['wavelength'],
         'na': args['numerical_aperture'],
@@ -593,9 +594,10 @@ def get_zernike_model(psfs, locs, z_step, px_size, args):
     }
 
     for i, psf in enumerate(tqdm(psfs)):
-        mcoefs, pcoefs = model_psf_zerns(psf.squeeze(), model_kwargs)
+        mcoefs, pcoefs, err = model_psf_zerns(psf.squeeze(), model_kwargs)
         locs.iloc[i, mcoef_idx] = mcoefs
         locs.iloc[i, pcoef_idx] = pcoefs
+        locs.iloc[i, mse_idx] = err
     return locs
 
 

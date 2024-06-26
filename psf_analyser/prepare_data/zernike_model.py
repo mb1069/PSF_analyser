@@ -11,7 +11,6 @@ def norm_zero_one(x):
 def model_psf_zerns(target_psf, model_kwargs, n_zerns=16):
     target_psf = center_data(target_psf)
     # Units of pupil display
-    print(target_psf.shape)
     target_psf_prep = prep_data_for_PR(target_psf, multiplier=1.1)
     # Retrieve phase for experimental PSF
     PR_result = retrieve_phase(target_psf_prep, model_kwargs, max_iters=1000, mse_tol=1e-5, pupil_tol=1e-5)
@@ -45,9 +44,8 @@ def model_psf_zerns(target_psf, model_kwargs, n_zerns=16):
 
 
     mse = np.mean((target_psf_prep-result_psf)**2)
-    print(mse)
     zerns =  PR_result.zd_result
-    return zerns.mcoefs, zerns.pcoefs
+    return zerns.mcoefs, zerns.pcoefs, mse
 
 # for n_zerns in [8, 16, 32, 64, 128]:
 #     print(n_zerns, end=' ')
