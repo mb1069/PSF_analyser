@@ -189,3 +189,5 @@ def filter_data_handler_by_files(value):
     offsets_surface_fig = fig_offset_surface(data_handler)
 
     return fwhm_xy_fig, fwhm_z_fig, offsets_surface_fig, img, fig, table
+
+    
