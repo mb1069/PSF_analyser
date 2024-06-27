@@ -61,6 +61,7 @@ Navigate to the URL, enter the directory containing your results `<mydir>/combin
 ## Developer help
 To run the tool to prepare data (from repo directory):
 `python psf_analyser/prepare_data/main.py -h`
+To perform the zernike polynomial fit, arguments `--zern -w <wavelength in nm> -na <numerical aperture> -ni <refractive index>
 
 To run the Dash app
 `python psf_analyser/app.py`

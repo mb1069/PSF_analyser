@@ -16,7 +16,6 @@ def resize_side_profile(img):
     return resize(img, (img.shape[0], 30))
 
 def get_lat_fwhm(stack, px_size_xy, debug=False, mse_thres=0.001):
-    
     def gaussian_2d(xy, amplitude, xo, yo, sigma_x, sigma_y, theta, offset):
         x, y = xy
         xo = float(xo)
