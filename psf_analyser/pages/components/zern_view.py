@@ -1,9 +1,9 @@
-from psf_analyser.plotting_funcs.rbf_surface import gen_surface_plot
 from natsort import natsorted
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 from pyotf.zernike import noll2name
 
+from psf_analyser.plotting_funcs.rbf_surface import gen_surface_plot
 
 def gen_zern_surface_fig(df, c):
     i = int(c.replace('pcoef_', '').replace('mcoef_', ''))

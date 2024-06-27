@@ -1,6 +1,5 @@
 from scipy.optimize import curve_fit
 import numpy as np
-# from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 from scipy.special import erf
 from skimage.transform import resize
