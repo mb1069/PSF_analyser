@@ -1,12 +1,24 @@
 from pathlib import Path
 import numpy as np
+import os
 
 
 def find_ftype_in_dir(dirname, key):
     return [str(fpath) for fpath in Path(dirname).rglob(key)][0]
 
+def handle_wsl_pathing(dirname):
+    if os.path.exists(dirname):
+        return dirname
+    print('Replacing dirname to handle wsl pathing')
+    dirname = dirname.replace('\\','/')
+    drive = dirname[0].lower()
+    idx_first_slash = dirname.index('/') + 1
+    return f"/mnt/{drive}/{dirname[idx_first_slash:]}"
+
+        
 
 def find_files_in_result_dir(dirname):
+    dirname=handle_wsl_pathing(dirname)
     tiff_files = {
         'locs': find_ftype_in_dir(dirname, 'locs.hdf'),
         'stacks': find_ftype_in_dir(dirname, 'stacks.ome.tif'),
