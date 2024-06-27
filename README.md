@@ -22,7 +22,7 @@ To create a conda env for the package:
 ```sh
 conda  create  -y  --name  psf_analyser  python==3.10 ;
 conda  activate  psf_analyser;
-pip  install  dist/psf_analyser-0.1.0-py3-none-any.whl;
+pip install git+https://github.com/mb1069/psf_analyser.git#egg=psf_analyser`
 ```
 
 ## Using the package
