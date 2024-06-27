@@ -575,16 +575,18 @@ def get_zernike_model(psfs, locs, z_step, px_size, args):
     print('Zernike modelling...')
 
     zern_mse_col = 'zern_fit_mse'
+    zern_rmse_col = 'zern_rmse_col'
     N_ZERN = 16
     labels_pcoef = [f'pcoef_{i+1}' for i in range(N_ZERN)]
     labels_mcoef = [f'mcoef_{i+1}' for i in range(N_ZERN)]
-    for l in labels_mcoef + labels_pcoef + [zern_mse_col]:
+    for l in labels_mcoef + labels_pcoef + [zern_mse_col, zern_rmse_col]:
         locs[l] = np.nan
 
     cols = pd.Series(range(locs.shape[1]), index=locs.columns)
     mcoef_idx = cols.reindex(labels_mcoef)
     pcoef_idx = cols.reindex(labels_pcoef)
     mse_idx = cols.reindex([zern_mse_col])
+    rmse_idx = cols.reindex([zern_rmse_col])
     model_kwargs = {
         'wl': args['wavelength'],
         'na': args['numerical_aperture'],
@@ -594,10 +596,11 @@ def get_zernike_model(psfs, locs, z_step, px_size, args):
     }
 
     for i, psf in enumerate(tqdm(psfs)):
-        mcoefs, pcoefs, err = model_psf_zerns(psf.squeeze(), model_kwargs)
+        mcoefs, pcoefs, err, rmse = model_psf_zerns(psf.squeeze(), model_kwargs)
         locs.iloc[i, mcoef_idx] = mcoefs
         locs.iloc[i, pcoef_idx] = pcoefs
         locs.iloc[i, mse_idx] = err
+        locs.iloc[i, rmse_idx] = rmse
     return locs
 
 
