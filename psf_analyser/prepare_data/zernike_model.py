@@ -10,8 +10,16 @@ def norm_zero_one(x):
     
 
 def get_rms_zerns(pcoefs):
-    # Exclude piston tip, tilt and defocus
-    return np.sqrt(np.mean(pcoefs[3:]))
+    # Exclude piston, tip, tilt and defocus
+    return np.sqrt((pcoefs[4:]**2).mean())
+
+
+def get_strehl(wavelength, rmse):
+    # phase coefficients are fraction of wavelength
+    wavelength = 1
+    strehl = np.exp(-(2 * np.pi * rmse / wavelength)**2)
+    return strehl
+
 
 def model_psf_zerns(target_psf, model_kwargs, n_zerns=16):
     target_psf = center_data(target_psf)
@@ -51,7 +59,8 @@ def model_psf_zerns(target_psf, model_kwargs, n_zerns=16):
     mse = np.mean((target_psf_prep-result_psf)**2)
     zerns =  PR_result.zd_result
     rmse = get_rms_zerns(zerns.pcoefs)
-    return zerns.mcoefs, zerns.pcoefs, mse, rmse
+    strehl = get_strehl(model_kwargs['wl'], rmse)
+    return zerns.mcoefs, zerns.pcoefs, mse, rmse, strehl
 
 # for n_zerns in [8, 16, 32, 64, 128]:
 #     print(n_zerns, end=' ')

@@ -25,6 +25,9 @@ import shutil
 import seaborn as sns
 import tensorflow as tf
 
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+
 from psf_analyser.data_handler.util import grid_psfs
 from psf_analyser.prepare_data.psf_metrics import get_lat_fwhm, get_axial_fwhm, get_projections
 from psf_analyser.prepare_data.zernike_model import model_psf_zerns
@@ -575,11 +578,12 @@ def get_zernike_model(psfs, locs, z_step, px_size, args):
     print('Zernike modelling...')
 
     zern_mse_col = 'zern_fit_mse'
-    zern_rmse_col = 'zern_rmse_col'
+    zern_rmse_col = 'zern_rmse'
+    zern_strehl_col = 'strehl_ratio'
     N_ZERN = 16
     labels_pcoef = [f'pcoef_{i+1}' for i in range(N_ZERN)]
     labels_mcoef = [f'mcoef_{i+1}' for i in range(N_ZERN)]
-    for l in labels_mcoef + labels_pcoef + [zern_mse_col, zern_rmse_col]:
+    for l in labels_mcoef + labels_pcoef + [zern_mse_col, zern_rmse_col, zern_strehl_col]:
         locs[l] = np.nan
 
     cols = pd.Series(range(locs.shape[1]), index=locs.columns)
@@ -587,6 +591,7 @@ def get_zernike_model(psfs, locs, z_step, px_size, args):
     pcoef_idx = cols.reindex(labels_pcoef)
     mse_idx = cols.reindex([zern_mse_col])
     rmse_idx = cols.reindex([zern_rmse_col])
+    zern_strehl_idx = cols.reindex([zern_strehl_col])
     model_kwargs = {
         'wl': args['wavelength'],
         'na': args['numerical_aperture'],
@@ -596,11 +601,12 @@ def get_zernike_model(psfs, locs, z_step, px_size, args):
     }
 
     for i, psf in enumerate(tqdm(psfs)):
-        mcoefs, pcoefs, err, rmse = model_psf_zerns(psf.squeeze(), model_kwargs)
+        mcoefs, pcoefs, err, rmse, strehl = model_psf_zerns(psf.squeeze(), model_kwargs)
         locs.iloc[i, mcoef_idx] = mcoefs
         locs.iloc[i, pcoef_idx] = pcoefs
         locs.iloc[i, mse_idx] = err
         locs.iloc[i, rmse_idx] = rmse
+        locs.iloc[i, zern_strehl_idx] = strehl
     return locs
 
 
@@ -751,7 +757,7 @@ def parse_args():
     parser.add_argument('-gb', '--gaussian-blur', default='3,2,2', help='Gaussian pixel-blur in Z/Y/X for bead offset estimation')
     parser.add_argument('--debug', action='store_true')
 
-    parser.add_argument('--zern', action='store_true')
+    parser.add_argument('--zern', help='Run zernike modelling of PSFs', action='store_true')
     parser.add_argument('-w', '--wavelength', help='Emission wavelength of the system (nm)', type=int)
     parser.add_argument('-na', '--numerical-aperture', help='Numerical aperature of the system', type=float)
     parser.add_argument('-ni', '--ni', help='Refractive index of the media', type=float)

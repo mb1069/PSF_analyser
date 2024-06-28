@@ -3,18 +3,19 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 
 
-def get_explore_bead_fig(df, x_axis, y_axis, graph):
+def get_explore_bead_fig(df, x_axis, y_axis, hue_axis, graph):
     if graph == "line":
-        fig = px.line(df, x=x_axis, y=y_axis, title="Line Chart")
+        fig = px.line(df, x=x_axis, y=y_axis, color=hue_axis, title="Line Chart")
     elif graph == "bar":
-        fig = px.bar(df, x=x_axis, y=y_axis, title="Bar Chart")
+        fig = px.bar(df, x=x_axis, y=y_axis, color=hue_axis, title="Bar Chart")
     elif graph == "scatter":
-        fig = px.scatter(df, x=x_axis, y=y_axis, title="Scatter Chart")
+        fig = px.scatter(df, x=x_axis, y=y_axis, color=hue_axis, title="Scatter Chart")
     elif graph == "2dhistogram":
         fig = px.density_heatmap(
             df,
             x=x_axis,
             y=y_axis,
+            color=hue_axis, 
             nbinsx=20,
             nbinsy=20,
             color_continuous_scale="Viridis",
@@ -39,6 +40,12 @@ def get_explore_bead_view(locs):
         value='y',
         clearable=False
     )
+    hue_col_sel = dcc.Dropdown(
+        id='bead-explore-hue-col-sel',
+        options=col_options,
+        value='y',
+        clearable=True
+    )
     type_sel = dcc.Dropdown(
         id="bead-explore-graph-type-sel",
         options=[
@@ -53,6 +60,7 @@ def get_explore_bead_view(locs):
     sel_row = dbc.Row([
             dbc.Col(x_col_sel),
             dbc.Col(y_col_sel),
+            dbc.Col(hue_col_sel),
             dbc.Col(type_sel),
         ], className='dbc'
     )
