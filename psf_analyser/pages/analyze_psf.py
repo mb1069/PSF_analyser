@@ -196,14 +196,15 @@ def filter_data_handler_by_files(value):
     [
         Input("bead-explore-x-col-sel", "value"),
         Input("bead-explore-y-col-sel", "value"),
+        Input("bead-explore-hue-col-sel", "value"),
         Input("bead-explore-graph-type-sel", "value"),
     ],
 )
-def generate_chart(x_axis, y_axis, graph):
+def generate_chart(x_axis, y_axis, hue, graph):
     if not x_axis:
         raise PreventUpdate
     if not y_axis:
         raise PreventUpdate
     if not graph:
         raise PreventUpdate
-    return get_explore_bead_fig(data_handler.locs, x_axis, y_axis, graph)
+    return get_explore_bead_fig(data_handler.locs, x_axis, y_axis, hue, graph)

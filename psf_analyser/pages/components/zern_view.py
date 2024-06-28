@@ -38,7 +38,7 @@ def get_zern_rmse_plot(df):
         'x': 'x (pixel)',
         'y': 'y (pixel)'
     }
-    fig = px.scatter(df, x='x', y='y', color='zern_rmse_col', labels=labels)
+    fig = px.scatter(df, x='x', y='y', color='zern_rmse', labels=labels)
     fig.update_layout(clickmode='event')
     fig.update_yaxes(
         scaleanchor = "x",
@@ -50,10 +50,10 @@ def get_zern_rmse_plot(df):
 
 
 def get_zern_plots(df):
-    df = df[df['zern_fit_mse']<0.01]
     zern_cols = get_zern_cols(df)
     if len(zern_cols) == 0:
         return html.H3('No zernike polynomial fitting data found, please prepare the data using `psf-prep-data --zern ...` ')
+    df = df[df['zern_fit_mse']<0.01]
     plots = [get_zern_rmse_plot(df)]
     for c in zern_cols:
         plots.append(get_zern_plot_pair(df, c))
