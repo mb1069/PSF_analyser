@@ -4,13 +4,15 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import matplotlib.pyplot as plt
 from natsort import natsorted
+import traceback
+from dash.exceptions import PreventUpdate
 
 from psf_analyser.data_handler.util import find_files_in_result_dir
 from psf_analyser.data_handler.bead_data_handler import BeadDataHandler
 from psf_analyser.plotting_funcs.rbf_surface import gen_surface_plot
 from psf_analyser.pages.components.ind_bead_view import get_ind_bead_view, get_bead_xy_scatter, gen_bead_table
-from psf_analyser.pages.components.explore_bead_view import get_explore_bead_view
-
+from psf_analyser.pages.components.explore_bead_view import get_explore_bead_view, get_explore_bead_fig
+from psf_analyser.pages.components.zern_view import get_zern_plots
 dash.register_page(__name__)
 
 data_handler = None
@@ -82,25 +84,25 @@ def fig_offset_scatter(locs):
     )
     return fig
 
-def gen_figs(locs):
+def gen_figs():
     figs = [
         dbc.Accordion([
             dbc.AccordionItem([
                 dbc.Row([
                     dbc.Col(dcc.Graph(id='fwhm_xy', figure=fig_fwhm_xy(data_handler))),
                     dbc.Col(dcc.Graph(id='fwhm_z', figure=fig_fwhm_z(data_handler)))
-                ]),
-                
-            ], title='FWHM (xy and z)'),
+                ])
+            ], title='FWHM (xy and z)', id='fwhm-plots'),
             dbc.AccordionItem([
                 dbc.Col(dcc.Graph(id='offsets_surface', figure=fig_offset_surface(data_handler))),
             ], title='Offset'),
             dbc.AccordionItem([
-                get_explore_bead_view(data_handler)
+                get_explore_bead_view(data_handler.locs)
             ], title='Explore beads'),
             dbc.AccordionItem([
                 get_ind_bead_view(data_handler, 0)
             ], title='Invididual beads'),
+            dbc.AccordionItem(children=get_zern_plots(data_handler.locs), title='Zernike modelling'),
         ], start_collapsed=False),
     ]
     return figs
@@ -130,10 +132,10 @@ def layout(folder_name=None):
                     dcc.Dropdown(options=fnames, value='all', id='file-selector'),
                 ])
             ], style={'margin-bottom': '1em'}),
-            dbc.Row(dbc.Col(*gen_figs(data_handler.locs)))
+            dbc.Row(dbc.Col(dbc.Spinner(color="primary", children=gen_figs())))
         ], className='dbc')
     except Exception as e:
-        
+        print(traceback.format_exc())
         return dbc.Container([
             dbc.Alert(f'Could not find results in path {folder_name}', color='danger'),
             html.A(href='/', children=[
@@ -187,3 +189,21 @@ def filter_data_handler_by_files(value):
     offsets_surface_fig = fig_offset_surface(data_handler)
 
     return fwhm_xy_fig, fwhm_z_fig, offsets_surface_fig, img, fig, table
+
+    
+@callback(
+    Output("bead-explore-graph", "figure"),
+    [
+        Input("bead-explore-x-col-sel", "value"),
+        Input("bead-explore-y-col-sel", "value"),
+        Input("bead-explore-graph-type-sel", "value"),
+    ],
+)
+def generate_chart(x_axis, y_axis, graph):
+    if not x_axis:
+        raise PreventUpdate
+    if not y_axis:
+        raise PreventUpdate
+    if not graph:
+        raise PreventUpdate
+    return get_explore_bead_fig(data_handler.locs, x_axis, y_axis, graph)

@@ -1,5 +1,15 @@
 
 # PSF_analyzer
+
+## Dependencies
+A custom version of Picasso is currently used; it can be downloaded and installed from the following url or using the following command:
+
+https://github.com/mb1069/picasso.git
+
+```sh
+pip install git+https://github.com/mb1069/picasso.git#egg=picassosr
+```
+
 ## Installation
 
 The package can be installed as a Python package (currently tested for Python 3.10).
@@ -12,7 +22,7 @@ To create a conda env for the package:
 ```sh
 conda  create  -y  --name  psf_analyser  python==3.10 ;
 conda  activate  psf_analyser;
-pip  install  dist/psf_analyser-0.1.0-py3-none-any.whl;
+pip install git+https://github.com/mb1069/psf_analyser.git#egg=psf_analyser`
 ```
 
 ## Using the package
@@ -51,6 +61,7 @@ Navigate to the URL, enter the directory containing your results `<mydir>/combin
 ## Developer help
 To run the tool to prepare data (from repo directory):
 `python psf_analyser/prepare_data/main.py -h`
+To perform the zernike polynomial fit, arguments `--zern -w <wavelength in nm> -na <numerical aperture> -ni <refractive index>
 
 To run the Dash app
 `python psf_analyser/app.py`
