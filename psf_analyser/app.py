@@ -25,7 +25,6 @@ def main():
         'dev_tools_props_check': DEV_MODE
     }
     app.run(host='0.0.0.0', **args)
-    print('Running!')
 
 if __name__ == '__main__':
     main()
