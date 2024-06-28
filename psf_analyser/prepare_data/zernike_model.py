@@ -11,8 +11,6 @@ def norm_zero_one(x):
 
 def get_rms_zerns(pcoefs):
     # Exclude piston, tip, tilt and defocus
-    # print('RMS', np.sqrt((pcoefs[4:]**2).sum()))
-
     return np.sqrt((pcoefs[4:]**2).mean())
 
 
