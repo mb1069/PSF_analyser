@@ -29,8 +29,8 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 from psf_analyser.data_handler.util import grid_psfs
-from psf_metrics import get_lat_fwhm, get_axial_fwhm, get_projections
-from zernike_model import model_psf_zerns
+from psf_analyser.prepare_data.psf_metrics import get_lat_fwhm, get_axial_fwhm, get_projections
+from psf_analyser.prepare_data.zernike_model import model_psf_zerns
 
 def norm_zero_one(s):
     max_s = s.max()
