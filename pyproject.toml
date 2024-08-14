@@ -37,6 +37,3 @@ psf-prep-data = "psf_analyser.prepare_data.main:run_tool"
 
 [project.gui-scripts]
 psf-gui = "psf_analyser.app:main"
-
-[project.entry-points."spam.magical"]
-tomatoes = "spam:main_tomatoes"
