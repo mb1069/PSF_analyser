@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from glob import glob
 from natsort import natsorted
 import subprocess
@@ -25,12 +26,14 @@ import shutil
 import seaborn as sns
 import tensorflow as tf
 
+
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 from psf_analyser.data_handler.util import grid_psfs
 from psf_analyser.prepare_data.psf_metrics import get_lat_fwhm, get_axial_fwhm, get_projections
 from psf_analyser.prepare_data.zernike_model import model_psf_zerns
+from psf_analyser.prepare_data.generate_spots import main as main_gen_spots
 
 def norm_zero_one(s):
     max_s = s.max()
@@ -93,6 +96,9 @@ def get_or_create_locs(slice_path, pixel_size, args):
             print(res.stderr)
             return
         tqdm.write('finished!')
+
+    if not os.path.exists(spots_path):
+        main_gen_spots({'locs': locs_path, 'img': slice_path})
 
     with h5py.File(spots_path) as f:
         spots = np.array(f['spots'])
@@ -408,7 +414,7 @@ def filter_beads(spots, locs, stacks, z_step, args, rejected_outpath):
         if len(rejected_idx):
             print('Writing rejected figures...')
 
-            write_stack_figures(stacks[rejected_idx], locs.iloc[rejected_idx], rejected_outpath)
+            write_stack_figures(stacks[rejected_idx], locs.iloc[rejected_idx], rejected_outpath, z_step)
 
     spots = spots[idx]
     locs = locs.iloc[idx]
@@ -455,7 +461,8 @@ def write_combined_data(stacks, locs, z_step, px_size, xsize, ysize, args):
     print(f'Total beads: {locs.shape[0]}')
 
 
-def write_stack_figure(i, central_bead_idx, stacks, locs, outpath, fname):
+def write_stack_figure(i, central_bead_idx, stacks, locs, outpath, fname, z_step):
+    # Write debug plot for an individual bead
     stack = stacks[i]
     loc = locs.iloc[i].to_dict()
 
@@ -465,33 +472,32 @@ def write_stack_figure(i, central_bead_idx, stacks, locs, outpath, fname):
     ax2 = fig.add_subplot(gs[0, 1:])
     ax3 = fig.add_subplot(gs[1, 1:])
 
-
     fig.suptitle(f'Bead: {i}')
 
     ax1.imshow(grid_psfs(stack, cols=20))
     ax1.set_title('Ordered by frame')
 
     # plot main bead
-    intensity = stack.max(axis=(1,2))
+    intensity = stack.max(axis=(1, 2))
     intensity = norm_zero_one(intensity)
     min_val = min(intensity)
     max_val = max(intensity)
-    frame_zpos = (np.arange(len(intensity)) * args['z_step']) - loc['offset']
-    ax2.plot(frame_zpos, intensity)
+    frame_zpos = (np.arange(len(intensity)) * z_step) - loc['offset']
+    ax2.plot(frame_zpos, intensity, label='This bead')
     ax2.vlines(0, min_val, max_val, colors='orange')
 
     # Plot alignment ref bead
-    intensity = stacks[central_bead_idx].max(axis=(1,2))
+    intensity = stacks[central_bead_idx].max(axis=(1, 2))
     intensity = norm_zero_one(intensity)
     min_val = min(intensity)
     max_val = max(intensity)
-    frame_zpos = (np.arange(len(intensity)) * args['z_step']) - locs.iloc[central_bead_idx].to_dict()['offset']
-    ax2.plot(frame_zpos, intensity)
+    frame_zpos = (np.arange(len(intensity)) * z_step) - locs.iloc[central_bead_idx].to_dict()['offset']
+    ax2.plot(frame_zpos, intensity, label='Alignment reference bead')
 
     ax2.set_title('Max normalised pixel intensity over z')
     ax2.set_xlabel('z (nm)')
-    ax2.set_ylabel('pixel intensity')    
-
+    ax2.set_ylabel('pixel intensity')
+    ax2.legend()
 
     for k, v in loc.items():
         if isinstance(v, float):
@@ -499,7 +505,7 @@ def write_stack_figure(i, central_bead_idx, stacks, locs, outpath, fname):
 
     text = json.dumps(loc, indent=4)
     ax3.axis((0, 10, 0, 10))
-    ax3.text(0,0, text, fontsize=18, wrap=True)
+    ax3.text(0, 0, text, fontsize=18, wrap=True)
     outfpath = os.path.join(outpath, f'{fname}_bead_{i}.png')
     plt.savefig(outfpath)
     plt.close()
@@ -509,14 +515,14 @@ from multiprocessing import Pool
 from itertools import repeat
 
 
-def write_stack_figures(stacks, locs, outpath):
+def write_stack_figures(stacks, locs, outpath, z_step):
     fname = set(locs['fname']).pop().replace('.ome.tif', '')
     os.makedirs(outpath, exist_ok=True)
 
     idx = np.arange(stacks.shape[0])
     central_bead_idx = get_central_bead_idx(locs)
     with Pool(8) as pool:
-        res = pool.starmap(write_stack_figure, zip(idx, repeat(central_bead_idx), repeat(stacks), repeat(locs), repeat(outpath), repeat(fname)))
+        res = pool.starmap(write_stack_figure, zip(idx, repeat(central_bead_idx), repeat(stacks), repeat(locs), repeat(outpath), repeat(fname)), repeat(z_step))
 
 def get_pixel_size(tags):
     num_pixels, units = tags['XResolution'].value
@@ -737,7 +743,7 @@ def run_tool():
 
     if args['debug']:
         outpath = os.path.join(args['outpath'], 'combined', 'debug')
-        write_stack_figures(stacks.mean(axis=-1), locs, outpath)
+        write_stack_figures(stacks.mean(axis=-1), locs, outpath, z_step)
         
 
 def parse_args():
