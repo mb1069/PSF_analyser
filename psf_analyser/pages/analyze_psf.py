@@ -2,7 +2,6 @@ import dash
 from dash import html, dcc, callback, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.express as px
-import matplotlib.pyplot as plt
 from natsort import natsorted
 import traceback
 from dash.exceptions import PreventUpdate
@@ -17,6 +16,7 @@ dash.register_page(__name__)
 
 data_handler = None
 
+
 def fig_fwhm_xy(data_handler):
     max_mse = 0.001
     labels = {
@@ -28,11 +28,11 @@ def fig_fwhm_xy(data_handler):
 
     vis_locs = data_handler.locs
     all_locs = data_handler._locs
-    all_locs = all_locs[all_locs['fwhm_xy_mse']<=max_mse]
+    all_locs = all_locs[all_locs['fwhm_xy_mse'] <= max_mse]
     z_min = all_locs['fwhm_xy'].min()
     z_max = all_locs['fwhm_xy'].max()
 
-    fig = gen_surface_plot(vis_locs[vis_locs['fwhm_xy_mse']<0.001], 'x', 'y', 'fwhm_xy', labels, title, z_min, z_max)
+    fig = gen_surface_plot(vis_locs[vis_locs['fwhm_xy_mse'] < 0.001], 'x', 'y', 'fwhm_xy', labels, title, z_min, z_max)
     return fig
 
 
@@ -47,12 +47,13 @@ def fig_fwhm_z(data_handler):
 
     vis_locs = data_handler.locs
     all_locs = data_handler._locs
-    all_locs = all_locs[all_locs['fwhm_z_mse']<=max_mse]
+    all_locs = all_locs[all_locs['fwhm_z_mse'] <= max_mse]
     z_min = all_locs['fwhm_z'].min()
     z_max = all_locs['fwhm_z'].max()
 
-    fig = gen_surface_plot(vis_locs[vis_locs['fwhm_z_mse']<0.2], 'x', 'y', 'fwhm_z', labels, title, z_min, z_max)
+    fig = gen_surface_plot(vis_locs[vis_locs['fwhm_z_mse'] < 0.2], 'x', 'y', 'fwhm_z', labels, title, z_min, z_max)
     return fig
+
 
 def fig_offset_surface(data_handler):
     labels = {
@@ -79,10 +80,11 @@ def fig_offset_scatter(locs):
     title = 'Offset (nm)'
     fig = px.scatter(locs, x='x', y='y', labels=labels, title=title)
     fig.update_yaxes(
-        scaleanchor = 'x',
-        scaleratio = 1,
+        scaleanchor='x',
+        scaleratio=1,
     )
     return fig
+
 
 def gen_figs():
     figs = [
@@ -107,6 +109,7 @@ def gen_figs():
     ]
     return figs
 
+
 def no_files_found_layout():
     return dbc.Container([
         html.H4('No folder name specified...'),
@@ -114,6 +117,7 @@ def no_files_found_layout():
             html.P('Click here to return to the home page')
         ])
     ])
+
 
 def layout(folder_name=None):
     global data_handler
@@ -134,7 +138,7 @@ def layout(folder_name=None):
             ], style={'margin-bottom': '1em'}),
             dbc.Row(dbc.Col(dbc.Spinner(color="primary", children=gen_figs())))
         ], className='dbc')
-    except Exception as e:
+    except Exception:
         print(traceback.format_exc())
         return dbc.Container([
             dbc.Alert(f'Could not find results in path {folder_name}', color='danger'),
@@ -152,7 +156,7 @@ def layout(folder_name=None):
     ],
     Input('ind-bead-xy-scatter', 'clickData'),
     prevent_initial_call=True
-    )
+)
 def display_click_data(clickData):
     point_id = clickData['points'][0]['customdata'][0]
 
@@ -160,6 +164,7 @@ def display_click_data(clickData):
     fig = get_bead_xy_scatter(data_handler, point_id)
     table = gen_bead_table(data_handler, point_id)
     return img, fig, table
+
 
 @callback(
     [
@@ -176,7 +181,7 @@ def display_click_data(clickData):
 def filter_data_handler_by_files(value):
     locs = data_handler._locs
     if value != 'all':
-        locs = locs[locs['fname']==value]
+        locs = locs[locs['fname'] == value]
     data_handler.locs = locs
 
     i = locs['point_id'].to_numpy()[0]
@@ -190,7 +195,7 @@ def filter_data_handler_by_files(value):
 
     return fwhm_xy_fig, fwhm_z_fig, offsets_surface_fig, img, fig, table
 
-    
+
 @callback(
     Output("bead-explore-graph", "figure"),
     [

@@ -2,12 +2,14 @@ import numpy as np
 from pyotf.phaseretrieval import retrieve_phase
 from pyotf.utils import prep_data_for_PR, center_data
 
+
 def mse(y, y_pred):
     return np.mean((y - y_pred) ** 2).sum()
 
+
 def norm_zero_one(x):
-    return (x-x.min()) / (x.max()-x.min())
-    
+    return (x - x.min()) / (x.max() - x.min())
+
 
 def get_rms_zerns(pcoefs):
     # Exclude piston, tip, tilt and defocus
@@ -27,24 +29,24 @@ def model_psf_zerns(target_psf, model_kwargs, n_zerns=16):
     target_psf_prep = prep_data_for_PR(target_psf, multiplier=1.1)
     # Retrieve phase for experimental PSF
     PR_result = retrieve_phase(target_psf_prep, model_kwargs, max_iters=1000, mse_tol=1e-5, pupil_tol=1e-5)
-    
+
     PR_result.fit_to_zernikes(n_zerns)
 
     result_psf = PR_result.generate_zd_psf(sphase=slice(None))
 
     target_psf_prep = norm_zero_one(target_psf_prep.astype(float))
     result_psf = norm_zero_one(result_psf.astype(float))
-    
+
     # if disp:
     #     PR_result.plot()
     #     PR_result.zd_result.plot()
     #     PR_result.plot_convergence()
     #     PR_result.model.PSFi = target_psf_prep
     #     PR_result.model.plot_psf()
-        
+
     #     PR_result.model.PSFi = result_psf
     #     PR_result.model.plot_psf()
-        
+
     #     plt.show()
     #     show_psf_axial(target_psf_prep, 'Target', 15)
     #     show_psf_axial(result_psf, 'Result', 15)
@@ -54,10 +56,8 @@ def model_psf_zerns(target_psf, model_kwargs, n_zerns=16):
     #     plt.plot(result_psf.max(axis=(1,2)))
     #     plt.show()
 
-
-
-    mse = np.mean((target_psf_prep-result_psf)**2)
-    zerns =  PR_result.zd_result
+    mse = np.mean((target_psf_prep - result_psf)**2)
+    zerns = PR_result.zd_result
     rmse = get_rms_zerns(zerns.pcoefs)
     strehl = get_strehl(model_kwargs['wl'], rmse)
     return zerns.mcoefs, zerns.pcoefs, mse, rmse, strehl

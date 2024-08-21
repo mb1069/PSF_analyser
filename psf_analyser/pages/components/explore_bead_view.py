@@ -15,7 +15,7 @@ def get_explore_bead_fig(df, x_axis, y_axis, hue_axis, graph):
             df,
             x=x_axis,
             y=y_axis,
-            color=hue_axis, 
+            color=hue_axis,
             nbinsx=20,
             nbinsy=20,
             color_continuous_scale="Viridis",
@@ -58,11 +58,11 @@ def get_explore_bead_view(locs):
         clearable=False,
     )
     sel_row = dbc.Row([
-            dbc.Col(x_col_sel),
-            dbc.Col(y_col_sel),
-            dbc.Col(hue_col_sel),
-            dbc.Col(type_sel),
-        ], className='dbc'
+        dbc.Col(x_col_sel),
+        dbc.Col(y_col_sel),
+        dbc.Col(hue_col_sel),
+        dbc.Col(type_sel),
+    ], className='dbc'
     )
     plot_row = dbc.Row(dbc.Col(
         dcc.Graph(id="bead-explore-graph", figure={})

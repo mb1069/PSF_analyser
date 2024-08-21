@@ -6,6 +6,7 @@ import plotly.express as px
 
 from psf_analyser.plotting_funcs.rbf_surface import gen_surface_plot
 
+
 def gen_zern_surface_fig(df, c):
     i = int(c.replace('pcoef_', '').replace('mcoef_', ''))
     title = f"Zern coef {i} - {noll2name[i]}"
@@ -16,6 +17,7 @@ def gen_zern_surface_fig(df, c):
         f'mcoef_{i}': f'mag. coef {i}'
     }
     return gen_surface_plot(df, 'x', 'y', c, labels, title)
+
 
 def get_zern_plot_pair(df, c):
     i = int(c.replace('pcoef_', ''))
@@ -41,11 +43,11 @@ def get_zern_rmse_plot(df):
     fig = px.scatter(df, x='x', y='y', color='zern_rmse', labels=labels)
     fig.update_layout(clickmode='event')
     fig.update_yaxes(
-        scaleanchor = "x",
-        scaleratio = 1,
+        scaleanchor="x",
+        scaleratio=1,
     )
     return dbc.Row([
-        dbc.Col(dcc.Graph(id=f'zern_rmse', figure=fig))
+        dbc.Col(dcc.Graph(id='zern_rmse', figure=fig))
     ])
 
 
@@ -53,10 +55,9 @@ def get_zern_plots(df):
     zern_cols = get_zern_cols(df)
     if len(zern_cols) == 0:
         return html.H3('No zernike polynomial fitting data found, please prepare the data using `psf-prep-data --zern ...` ')
-    df = df[df['zern_fit_mse']<0.01]
+    df = df[df['zern_fit_mse'] < 0.01]
     plots = [get_zern_rmse_plot(df)]
     for c in zern_cols:
         plots.append(get_zern_plot_pair(df, c))
 
     return plots
-

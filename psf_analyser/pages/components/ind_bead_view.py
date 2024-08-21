@@ -1,8 +1,8 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 import plotly.express as px
-from dash import dash_table
 from natsort import natsorted
+
 
 def get_bead_xy_scatter(data_handler, i):
     locs = data_handler.locs
@@ -15,31 +15,16 @@ def get_bead_xy_scatter(data_handler, i):
     fig = px.scatter(locs, x='x', y='y', color='selected', custom_data='point_id', labels=labels)
     fig.update_layout(clickmode='event')
     fig.update_yaxes(
-        scaleanchor = "x",
-        scaleratio = 1,
+        scaleanchor="x",
+        scaleratio=1,
     )
-    # fname = locs['fname'][i]
-    # print('Setting image')
-
-    # fig.add_layout_image(
-    #     dict(
-    #         source=data_handler.key_frames[fname],
-    #         xref="x",
-    #         yref="y",
-    #         x=locs['x'].min(),
-    #         y=locs['y'].max(),
-    #         sizex=1000,
-    #         sizey=1000,
-    #         sizing="stretch",
-    #         opacity=1,
-    #         layer="below")
-    # )
 
     return fig
 
+
 def gen_bead_table(data_handler, i):
     locs = data_handler.locs
-    loc_data = locs[locs['point_id']==i].to_dict(orient='records')[0]
+    loc_data = locs[locs['point_id'] == i].to_dict(orient='records')[0]
     # print(data_handler.locs)
     # loc_data = data_handler.locs.iloc[i].to_dict()
     loc_data['fname'] = loc_data['fname'].split('___')[-1]
@@ -55,7 +40,6 @@ def gen_bead_table(data_handler, i):
     for c in ['offset', 'fwhm_xy', 'fwhm_z']:
         loc_data[f'{c} (nm)'] = loc_data.pop(c)
 
-
     loc_data = {k: (round(v, 3) if isinstance(v, float) else v) for k, v in loc_data.items()}
 
     data = [(k, loc_data[k]) for k in natsorted(loc_data.keys())]
@@ -69,6 +53,7 @@ def gen_bead_table(data_handler, i):
     table = dbc.Table(table_header + table_body, bordered=True)
 
     return table
+
 
 def get_ind_bead_view(data_handler, i):
     ind_bead_container = dbc.Row([

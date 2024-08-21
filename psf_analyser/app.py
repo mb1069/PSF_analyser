@@ -1,8 +1,9 @@
 import dash
-from dash import Dash, html, dcc
+from dash import Dash, html
 import dash_bootstrap_components as dbc
 
 DEV_MODE = True
+
 
 def main():
     dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.min.css"
@@ -11,11 +12,6 @@ def main():
     app.layout = dbc.Container([
         html.H1('PSF analyser'),
         html.A(children=html.P('To home page'), href='/'),
-        # html.Div([
-        #     html.Div(
-        #         dcc.Link(f"{page['name']} - {page['path']}", href=page["relative_path"])
-        #     ) for page in dash.page_registry.values()
-        # ]),
         dash.page_container
     ])
     args = {
@@ -25,6 +21,7 @@ def main():
         'dev_tools_props_check': DEV_MODE
     }
     app.run(host='0.0.0.0', **args)
+
 
 if __name__ == '__main__':
     main()
